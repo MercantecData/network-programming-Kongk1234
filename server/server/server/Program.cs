@@ -1,37 +1,87 @@
 ﻿using System;
-using System.Text;
 using System.Net;
+using System.Text;
 using System.Net.Sockets;
+using System.Threading.Tasks;
+using System.Threading;
 
-namespace server
+namespace TestServer
 {
     class Program
     {
-            static void Main(string[] args)
-            {
-                int port = 420;
-                IPAddress ip = IPAddress.Any;
-                IPEndPoint endpoint = new IPEndPoint(ip, port);
 
-                TcpListener listener = new TcpListener(endpoint);
-                listener.Start();
+        public static void server()
+        {
+            int port = 420;
+            IPAddress ip = IPAddress.Any;
+            IPEndPoint endpoint = new IPEndPoint(ip, port);
+            TcpListener listener = new TcpListener(endpoint);
 
-                Console.WriteLine("Awaiting Clients");
+            listener.Start();
 
-                TcpClient client = listener.AcceptTcpClient();
+            Console.WriteLine("Awaiting Clients");
 
-                NetworkStream stream = client.GetStream();
+            TcpClient client = listener.AcceptTcpClient();
+
+            NetworkStream stream = client.GetStream();
 
             byte[] buffer = new byte[256];
+
             while (true)
             {
                 int numb = stream.Read(buffer, 0, buffer.Length);
 
-                string mes = Encoding.UTF8.GetString(buffer, 0, numb);
+                serverMsg = Encoding.UTF8.GetString(buffer, 0, numb);
 
-                Console.WriteLine(mes);
             }
+        }
+
+        public static string serverMsg;
+        static void Main(string[] args)
+        {
+            Task task = Task.Run((Action)server);
+
+
+
+            TcpClient client = new TcpClient();
+
+            Console.WriteLine("Port:");
+            int port = Convert.ToInt32(Console.ReadLine());
+
+            Console.WriteLine("Ip:");
+            string ipaddress = Console.ReadLine();
+            IPAddress ip = IPAddress.Parse(ipaddress);
+            IPEndPoint endpoint = new IPEndPoint(ip, port);
+
+            client.Connect(endpoint);
+            int i = 0;
+            while (true)
+            {
+                serverMsg = serverMsg;
+
+                if (i == 3)
+                {
+                    NetworkStream stream = client.GetStream();
+
+                    Console.WriteLine("Skriv din besked:");
+                    string text = Console.ReadLine();
+                    byte[] bytes = Encoding.UTF8.GetBytes(text);
+
+                    stream.Write(bytes, 0, bytes.Length);
+                    Thread.Sleep(1000);
+                    Console.WriteLine(serverMsg);
+                    i = 0;
+                }
+                else
+                {
+                    i++;
+                }
+
             }
-        
+
+
+        }
+
+
     }
 }
