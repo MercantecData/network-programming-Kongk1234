@@ -7,7 +7,7 @@ namespace encoding
     {
         static void Main(string[] args)
         {
-            string text = "sut mig din måge";
+            string text = "mcdonalds er en måge";
             byte[] bytes = Encoding.ASCII.GetBytes(text);
             foreach(byte b in bytes)
             {
