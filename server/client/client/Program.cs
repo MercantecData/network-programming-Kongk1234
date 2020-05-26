@@ -7,34 +7,34 @@ namespace client
 {
     class Program
     {
-        static void Main(string[] args)
+        static void main()
+        {
+            Client client = new Client();
+            Console.WriteLine(client);
+        }
+    }
+
+    public class Client
+    {
+        public Client()
         {
             TcpClient client = new TcpClient();
 
-            Console.WriteLine("Port:");
-            int port = Convert.ToInt32(Console.ReadLine());
-
-            Console.WriteLine("Ip:");
+            int port = 420;
             string ipaddress = Console.ReadLine();
             IPAddress ip = IPAddress.Parse(ipaddress);
-            IPEndPoint endpoint = new IPEndPoint(ip, port);
+            IPEndPoint endPoint = new IPEndPoint(ip, port);
 
-            client.Connect(endpoint);
-            while (true)
-            {
+            client.Connect(endPoint);
+            NetworkStream stream = client.GetStream();
+        }
+        public async void receiveMessage(NetworkStream stream)
+        {
+            byte[] buffer = new byte[256];
+            int numberBytesread = await stream.ReadAsync(buffer, 0, 256);
+            string recieveMessage = Encoding.UTF8.GetString(buffer, 0, numberBytesread);
 
-                NetworkStream stream = client.GetStream();
-
-                Console.WriteLine("Skriv din besked:");
-                string text = Console.ReadLine();
-
-
-                byte[] bytes = Encoding.UTF8.GetBytes(text);
-
-                stream.Write(bytes, 0, bytes.Length);
-            }
-
-            client.Close();
+            Console.Write("\n" + recieveMessage);
         }
     }
 }
