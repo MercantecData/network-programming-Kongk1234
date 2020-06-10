@@ -6,7 +6,7 @@ using System.Net.Sockets;
 
 namespace Server
 {
-
+    //Laver en class med en tcp client og en string og includer dem i min clientconnect
     public class ClientConnect
     {
         public TcpClient client;
@@ -18,9 +18,11 @@ namespace Server
         }
     }
 
+    //Laver min server og laver en liste til clients
     class Server
     {
         List<ClientConnect> clients = new List<ClientConnect>();
+        //giver en port og definere et brugerinput til ip adresse og gør så den acceptere klienter 
         public Server()
         {
             int port = 420;
@@ -32,6 +34,7 @@ namespace Server
             listner.Start();
             acceptClient(listner);
             Console.WriteLine("Started");
+            //Laver et while loop der gør man kan skrive til hinanden 
             while (true)
             {
                 string text = Console.ReadLine();
@@ -43,6 +46,7 @@ namespace Server
             }
         }
 
+        //Her accepetere jeg klienter og tager den første besked de skriver 
         public async void acceptClient(TcpListener listener)
         {
             bool isRunning = true;
@@ -61,6 +65,7 @@ namespace Server
 
         }
 
+        //her modtager jeg beskeder og laver commands hvis man skriver noget specefikt
         public async void recieveMessage(TcpClient client)
         {
             byte[] buffer = new byte[256];
@@ -73,17 +78,53 @@ namespace Server
                 Console.WriteLine("\n" + receivedMessage);
                 foreach (ClientConnect aclient in clients)
                 {
-                   if(aclient.client == client)
-                   {
+                    if (aclient.client == client)
+                    {
                         Name = aclient.name;
-                   }
-                   
+                    }
+
                 }
-                foreach(ClientConnect clienten in clients)
+                if (receivedMessage == "måge")
                 {
-                    string Mes = Name + ":" + receivedMessage;
-                    byte[] buffer1 = Encoding.UTF8.GetBytes(Mes);
-                    clienten.client.GetStream().Write(buffer1, 0, buffer1.Length);
+                    foreach (ClientConnect client2 in clients)
+                    {
+                        string Måge = "Måger (Larinae) er en underfamilie af mågefuglene. \n De er udbredt i alle verdensdele og er store eller mellemstore fugle, der er knyttet til vandet. \n Danmark er med sine mange lavvandede strande et godt sted for måger. \n Fødderne er forsynet med svømmehud, vingerne er lange og slanke, og flugten er let og ubesværet med rolige vingeslag. \n Fjerdragten er ret ensartet farvet, hyppigst gråblå på oversiden og hvid på undersiden. \n Mange måger yngler i kolonier og færdes også udenfor yngletiden i flokke. \n Føden er meget variabel, men består oftest af småfisk eller krebsdyr.";
+                        byte[] buffer1 = Encoding.UTF8.GetBytes(Måge);
+                        client2.client.GetStream().Write(buffer1, 0, buffer1.Length);
+                    }
+
+                }
+                else if (receivedMessage.Contains("fugl") || receivedMessage.Contains("fugle") || receivedMessage.Contains("Fugl") || receivedMessage.Contains("Fugle"))
+                {
+                    foreach (ClientConnect client2 in clients)
+                    {
+                        string fugl = "Hvis du til fuglekending, selv er et fjog, så spørg Poul Hansen ornitolog";
+                        byte[] buffer1 = Encoding.UTF8.GetBytes(fugl);
+                        client2.client.GetStream().Write(buffer1, 0, buffer1.Length);
+                    }
+
+                }
+                //Hvis man skriver change i chatten, har man mulighed for at ændre sit brugernavn
+                else if (receivedMessage.Contains("change"))
+                {
+                    string[] newName = receivedMessage.Split(":");
+                    foreach (ClientConnect client2 in clients)
+                    {
+                        if (client2.name == Name)
+                        {
+                            client2.name = newName[1];
+                        }
+                    }
+                }
+                else
+                {
+                    //Når man skriver en besked tager man den første besked og sætter den sammen med de resterende beskeder 
+                    foreach (ClientConnect clienten in clients)
+                    {
+                        string Mes = Name + ":" + receivedMessage;
+                        byte[] buffer1 = Encoding.UTF8.GetBytes(Mes);
+                        clienten.client.GetStream().Write(buffer1, 0, buffer1.Length);
+                    }
                 }
             }
         }

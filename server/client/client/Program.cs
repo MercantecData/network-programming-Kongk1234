@@ -10,6 +10,7 @@ namespace Server
     {
         static void Main(string[] args)
         {
+            //Laver valgmuligheder for klienten og kalder så en funktion i forhold hvilken en de vælger
             bool sevs = true;
             while (sevs)
             {
@@ -19,7 +20,7 @@ namespace Server
                 string test = Console.ReadLine();
                 if (test == "server")
                 {
-                    server server = new server();
+                    Server server = new Server();
                 }
                 else if (test == "client")
                 {
@@ -37,67 +38,9 @@ namespace Server
         }
     }
 
-    public class server
-    {
-        List<TcpClient> clients = new List<TcpClient>();
-        public server()
-        {
-            int port = 420;
-            IPAddress ip = IPAddress.Any;
-            IPEndPoint localendpoint = new IPEndPoint(ip, port);
-
-            TcpListener listner = new TcpListener(localendpoint);
-
-            listner.Start();
-            acceptClient(listner);
-            Console.WriteLine("Mågegeden knepper bæltedyret");
-            while (true)
-            {
-                string text = Console.ReadLine();
-                byte[] buffer = Encoding.UTF8.GetBytes(text);
-                foreach (TcpClient client in clients)
-                {
-                    client.GetStream().Write(buffer, 0, buffer.Length);
-                }
-            }
-        }
-
-        public async void recieveMessage(NetworkStream stream)
-        {
-            while (true)
-            {
-                byte[] buffer = new byte[256];
-                int numberOfBytesRead = await stream.ReadAsync(buffer, 0, 256);
-                string receivedMessage = Encoding.UTF8.GetString(buffer, 0, numberOfBytesRead);
-                Console.WriteLine("\n" + receivedMessage);
-                foreach (TcpClient client in clients)
-                {
-                    string text = receivedMessage;
-                    byte[] buffer1 = Encoding.UTF8.GetBytes(text);
-                    foreach(TcpClient client1 in clients)
-                    {
-                        client.GetStream().Write(buffer1, 0, buffer1.Length);
-                    }
-                }
-            }
-        }
-        public async void acceptClient(TcpListener listener)
-        {
-            bool isRunning = true;
-            while (isRunning)
-            {
-                TcpClient client = await listener.AcceptTcpClientAsync();
-                clients.Add(client);
-                NetworkStream stream = client.GetStream();
-                int numb =
-                recieveMessage(stream);
-            }
-
-        }
-
-    }
     public class Client
     {
+        //Laver det muligt for klienten og skrive en port og ip adresse at connecte til
         public Client()
         {
             TcpClient client = new TcpClient();
@@ -112,13 +55,14 @@ namespace Server
             client.Connect(endPoint);
             NetworkStream stream = client.GetStream();
             Console.WriteLine("Write your message");
-
+            Console.WriteLine("Skriv dit navn");
             while (true)
             {
                 sendMessage(stream);
                 receiveMessage(stream);
             }
         }
+        //Her gør jeg så man kan sende beskeder
         public async void sendMessage(NetworkStream stream)
         {
             string text = Console.ReadLine();
@@ -129,13 +73,14 @@ namespace Server
             {
                 Console.Clear();
             }
-           
+
             else
             {
                 byte[] bytes = Encoding.UTF8.GetBytes(text);
                 await stream.WriteAsync(bytes, 0, bytes.Length);
             }
         }
+        //Her modtager jeg beskeder 
         public async void receiveMessage(NetworkStream stream)
         {
             while (true)
@@ -145,7 +90,8 @@ namespace Server
                 string recieveMessage = Encoding.UTF8.GetString(buffer, 0, numberBytesread);
 
                 Console.WriteLine("\n" + recieveMessage);
+
             }
-        }   
+        }
     }
 }

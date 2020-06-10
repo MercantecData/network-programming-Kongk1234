@@ -10,6 +10,7 @@ namespace Server
     {
         static void Main(string[] args)
         {
+            //Laver valgmuligheder for klienten og kalder så en funktion i forhold hvilken en de vælger
             bool sevs = true;
             while (sevs)
             {
@@ -36,9 +37,10 @@ namespace Server
             }
         }
     }
-    
+
     public class Client
     {
+        //Laver det muligt for klienten og skrive en port og ip adresse at connecte til
         public Client()
         {
             TcpClient client = new TcpClient();
@@ -53,13 +55,14 @@ namespace Server
             client.Connect(endPoint);
             NetworkStream stream = client.GetStream();
             Console.WriteLine("Write your message");
-
+            Console.WriteLine("Skriv dit navn");
             while (true)
             {
                 sendMessage(stream);
                 receiveMessage(stream);
             }
         }
+        //Her gør jeg så man kan sende beskeder
         public async void sendMessage(NetworkStream stream)
         {
             string text = Console.ReadLine();
@@ -70,13 +73,14 @@ namespace Server
             {
                 Console.Clear();
             }
-           
+
             else
             {
                 byte[] bytes = Encoding.UTF8.GetBytes(text);
                 await stream.WriteAsync(bytes, 0, bytes.Length);
             }
         }
+        //Her modtager jeg beskeder 
         public async void receiveMessage(NetworkStream stream)
         {
             while (true)
@@ -86,7 +90,8 @@ namespace Server
                 string recieveMessage = Encoding.UTF8.GetString(buffer, 0, numberBytesread);
 
                 Console.WriteLine("\n" + recieveMessage);
+
             }
-        }   
+        }
     }
 }
